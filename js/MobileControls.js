@@ -15,23 +15,106 @@ class MobileControls {
                (window.innerWidth <= 768);
     }
     
+    createExternalControls() {
+        // Create HTML controls container
+        const controlsDiv = document.getElementById('mobile-controls');
+        if (!controlsDiv) {
+            const newControlsDiv = document.createElement('div');
+            newControlsDiv.id = 'mobile-controls';
+            newControlsDiv.className = 'mobile-controls-container';
+            document.getElementById('game-container').appendChild(newControlsDiv);
+            
+            // Create D-Pad
+            const dpadDiv = document.createElement('div');
+            dpadDiv.className = 'dpad-container';
+            dpadDiv.innerHTML = `
+                <div class="dpad">
+                    <button class="dpad-btn dpad-up" data-action="jump">▲</button>
+                    <button class="dpad-btn dpad-left" data-action="left">◄</button>
+                    <button class="dpad-btn dpad-center"></button>
+                    <button class="dpad-btn dpad-right" data-action="right">►</button>
+                </div>
+            `;
+            
+            // Create Action Buttons
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'actions-container';
+            actionsDiv.innerHTML = `
+                <button class="action-btn jump-btn" data-action="jump">
+                    <span class="btn-label">A</span>
+                    <span class="btn-sublabel">JUMP</span>
+                </button>
+                <button class="action-btn bark-btn" data-action="bark">
+                    <span class="btn-label">B</span>
+                    <span class="btn-sublabel">BARK</span>
+                </button>
+            `;
+            
+            newControlsDiv.appendChild(dpadDiv);
+            newControlsDiv.appendChild(actionsDiv);
+            
+            // Set up event listeners
+            this.setupHTMLControls(newControlsDiv);
+        }
+    }
+    
+    setupHTMLControls(container) {
+        const buttons = container.querySelectorAll('button[data-action]');
+        
+        buttons.forEach(button => {
+            const action = button.getAttribute('data-action');
+            
+            // Touch events
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                button.classList.add('active');
+                this.handleAction(action, true);
+            });
+            
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                button.classList.remove('active');
+                this.handleAction(action, false);
+            });
+            
+            button.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                button.classList.remove('active');
+                this.handleAction(action, false);
+            });
+            
+            // Mouse events for testing
+            button.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                button.classList.add('active');
+                this.handleAction(action, true);
+            });
+            
+            button.addEventListener('mouseup', (e) => {
+                e.preventDefault();
+                button.classList.remove('active');
+                this.handleAction(action, false);
+            });
+            
+            button.addEventListener('mouseleave', (e) => {
+                button.classList.remove('active');
+                this.handleAction(action, false);
+            });
+        });
+    }
+    
     createControls() {
         const width = this.scene.cameras.main.width;
         const height = this.scene.cameras.main.height;
         
-        // Control container
+        // Control container - positioned in fixed external HTML container
+        this.createExternalControls();
+        
+        // Also create minimal overlay indicators for feedback
         this.controlsContainer = this.scene.add.container(0, 0)
             .setScrollFactor(0)
-            .setDepth(1000);
-        
-        // D-Pad on the left
-        this.createDPad(80, height - 100);
-        
-        // Action buttons on the right
-        this.createActionButtons(width - 80, height - 100);
-        
-        // Make buttons semi-transparent
-        this.controlsContainer.setAlpha(0.7);
+            .setDepth(1000)
+            .setAlpha(0); // Hide the overlay controls since we use external ones
     }
     
     createDPad(centerX, centerY) {
