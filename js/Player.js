@@ -22,6 +22,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.normalSpeed = 160;
         this.jumpVelocity = -380;
         
+        // Double jump mechanics
+        this.maxJumps = 2;
+        this.jumpsRemaining = 2;
+        this.hasReleasedJump = true; // Prevents holding jump
+        
         // Bark attack
         this.barkCooldown = false;
         this.barkCooldownTime = 500;
@@ -73,6 +78,38 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         });
     }
     
+    createDoubleJumpEffect() {
+        // Create a small burst effect for double jump
+        const particles = this.scene.add.particles(this.x, this.y, 'particle', {
+            speed: { min: 50, max: 100 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.5, end: 0 },
+            blendMode: 'ADD',
+            lifespan: 300,
+            quantity: 8,
+            tint: 0xADD8E6,
+            emitting: false
+        });
+        
+        particles.explode(8);
+        
+        this.scene.time.delayedCall(400, () => {
+            if (particles && particles.active) particles.destroy();
+        });
+        
+        // Small puff cloud
+        const puff = this.scene.add.circle(this.x, this.y, 15, 0xFFFFFF, 0.4);
+        this.scene.tweens.add({
+            targets: puff,
+            radius: 25,
+            alpha: 0,
+            duration: 300,
+            onComplete: () => {
+                if (puff) puff.destroy();
+            }
+        });
+    }
+    
     update() {
         const speed = this.zoomiesActive ? this.zoomiesSpeed : this.normalSpeed;
         
@@ -95,13 +132,36 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             this.idleTime++;
         }
         
-        // Jumping (keyboard + mobile)
+        // Jumping with double jump (keyboard + mobile)
         const jumpPressed = this.cursors.up.isDown || this.wasd.up.isDown || this.spaceKey.isDown || this.mobileControls.jump;
-        if (jumpPressed && this.body.touching.down) {
+        
+        // Reset jumps when on ground
+        if (this.body.touching.down) {
+            this.jumpsRemaining = this.maxJumps;
+            this.hasReleasedJump = false;
+        }
+        
+        // Allow jump if button was released (prevents holding)
+        if (!jumpPressed) {
+            this.hasReleasedJump = true;
+        }
+        
+        // Jump logic with double jump
+        if (jumpPressed && this.hasReleasedJump && this.jumpsRemaining > 0) {
+            this.hasReleasedJump = false;
+            this.jumpsRemaining--;
+            
             this.setVelocityY(this.jumpVelocity);
+            
             if (this.scene.sound.get('jump')) {
                 this.scene.sound.play('jump', { volume: 0.3 });
             }
+            
+            // Visual effect for double jump
+            if (this.jumpsRemaining === 0 && !this.body.touching.down) {
+                this.createDoubleJumpEffect();
+            }
+            
             // Reset jump flag for mobile (to prevent continuous jumping)
             if (this.mobileControls.jump) {
                 this.scene.time.delayedCall(100, () => {
@@ -196,7 +256,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         
         if (stillAlive) {
             this.isInvulnerable = true;
-            this.scene.sound.play('hurt', { volume: 0.4 });
+            if (this.scene.sound.get('hurt')) {
+                this.scene.sound.play('hurt', { volume: 0.4 });
+            }
             
             // Flash effect
             this.scene.tweens.add({
@@ -207,8 +269,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
                 repeat: 10
             });
             
-            // Knockback
+            // Knockback (also resets jumps for recovery)
             this.setVelocity(this.facing === 'right' ? -200 : 200, -200);
+            this.jumpsRemaining = this.maxJumps; // Give back jumps after hit for recovery
             
             this.scene.time.delayedCall(this.invulnerabilityDuration, () => {
                 this.isInvulnerable = false;
@@ -225,7 +288,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     die() {
         this.setVelocity(0, -300);
         this.setAlpha(0.5);
-        this.scene.sound.play('death', { volume: 0.5 });
+        if (this.scene.sound.get('death')) {
+            this.scene.sound.play('death', { volume: 0.5 });
+        }
         
         this.scene.time.delayedCall(1000, () => {
             this.scene.scene.start('GameOverScene');

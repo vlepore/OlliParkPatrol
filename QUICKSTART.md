@@ -55,7 +55,8 @@ Then open your browser to: **http://localhost:8000**
 2. 👃 **Follow the nose glow** → Find hidden dogs
 3. 🔊 **Bark twice at enemies** → Stun, then defeat
 4. 💗 **Collect treats** → Restore health
-5. 🏃 **Reach the end** → Complete the level
+5. 🦘 **Jump twice** → Double jump to reach high places!
+6. 🏃 **Reach the end** → Complete the level
 
 ## Scoring Quick Reference
 

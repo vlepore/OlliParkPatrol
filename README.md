@@ -61,6 +61,9 @@ Olli's nose will glow when you're near a hidden lost dog. Follow the glow to fin
 #### ⚔️ Bark Attack
 Press **X** to bark and stun enemies. Bark at stunned enemies again to defeat them!
 
+#### 🦘 Double Jump
+Press jump again while in the air for a second jump! This helps reach higher platforms and escape danger.
+
 ## 📊 Scoring System
 
 ### Point Values
