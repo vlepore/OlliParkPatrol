@@ -10,9 +10,14 @@ class Collectible extends Phaser.Physics.Arcade.Sprite {
         this.setCollideWorldBounds(false);
         this.body.setAllowGravity(false);
         
+        // Set proper collision body size
+        this.setSize(20, 20);
+        this.body.setSize(20, 20);
+        
         // Floating animation
         this.startY = y;
         this.floatOffset = 0;
+        this.baseY = y;
         
         // Add sparkle effect
         this.createSparkle(scene);
@@ -39,9 +44,14 @@ class Collectible extends Phaser.Physics.Arcade.Sprite {
     update(time) {
         // Gentle floating motion
         this.floatOffset = Math.sin(time * 0.003) * 5;
-        this.y = this.startY + this.floatOffset;
+        this.y = this.baseY + this.floatOffset;
         
-        if (this.sparkle) {
+        // Update physics body position
+        if (this.body) {
+            this.body.updateFromGameObject();
+        }
+        
+        if (this.sparkle && this.sparkle.active) {
             this.sparkle.setPosition(this.x, this.y);
         }
         
@@ -50,8 +60,13 @@ class Collectible extends Phaser.Physics.Arcade.Sprite {
     }
     
     collect(player, scene) {
+        // Prevent double collection
+        if (!this.active) return;
+        
         // Play collect sound
-        scene.sound.play('collect', { volume: 0.4 });
+        if (scene.sound.get('collect')) {
+            scene.sound.play('collect', { volume: 0.4 });
+        }
         
         // Create particle burst
         const particles = scene.add.particles(this.x, this.y, 'particle', {
@@ -67,32 +82,43 @@ class Collectible extends Phaser.Physics.Arcade.Sprite {
         particles.explode(8);
         
         scene.time.delayedCall(500, () => {
-            if (particles) particles.destroy();
+            if (particles && particles.active) particles.destroy();
         });
         
         // Create floating score text
         const points = this.getPoints();
-        const scoreText = scene.add.text(this.x, this.y, `+${points}`, {
-            fontSize: '20px',
-            color: '#FFD700',
-            fontFamily: 'Press Start 2P',
-            stroke: '#000',
-            strokeThickness: 4
-        }).setOrigin(0.5);
-        
-        scene.tweens.add({
-            targets: scoreText,
-            y: scoreText.y - 50,
-            alpha: 0,
-            duration: 800,
-            onComplete: () => scoreText.destroy()
-        });
+        if (points > 0) {
+            const scoreText = scene.add.text(this.x, this.y, `+${points}`, {
+                fontSize: '20px',
+                color: '#FFD700',
+                fontFamily: 'Press Start 2P',
+                stroke: '#000',
+                strokeThickness: 4
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
+            
+            // Convert to screen position
+            const screenX = this.x - scene.cameras.main.scrollX;
+            const screenY = this.y - scene.cameras.main.scrollY;
+            scoreText.setPosition(screenX, screenY);
+            
+            scene.tweens.add({
+                targets: scoreText,
+                y: scoreText.y - 50,
+                alpha: 0,
+                duration: 800,
+                onComplete: () => {
+                    if (scoreText) scoreText.destroy();
+                }
+            });
+        }
         
         // Update game state based on type
         this.applyEffect(player);
         
         // Destroy collectible
-        if (this.sparkle) this.sparkle.destroy();
+        if (this.sparkle && this.sparkle.active) {
+            this.sparkle.destroy();
+        }
         this.destroy();
     }
     

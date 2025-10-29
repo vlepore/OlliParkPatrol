@@ -10,6 +10,10 @@ class LostDog extends Phaser.Physics.Arcade.Sprite {
         this.setCollideWorldBounds(false);
         this.body.setAllowGravity(false);
         
+        // Set proper collision body
+        this.setSize(20, 20);
+        this.body.setSize(20, 20);
+        
         // Hidden initially
         this.isHidden = true;
         this.isRescued = false;

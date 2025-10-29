@@ -321,24 +321,41 @@ class GameScene extends Phaser.Scene {
                 // Reduce friction on platforms
                 player.body.setDragX(50);
             });
+        } else {
+            this.player.body.setDragX(800);
         }
         
-        // Collectibles
-        this.physics.add.overlap(this.player, this.tennisBalls, this.collectItem, null, this);
-        this.physics.add.overlap(this.player, this.bones, this.collectItem, null, this);
-        this.physics.add.overlap(this.player, this.treats, this.collectItem, null, this);
+        // Collectibles - use collider instead of overlap for better detection
+        this.physics.add.overlap(this.player, this.tennisBalls, this.collectItem, this.checkCollectible, this);
+        this.physics.add.overlap(this.player, this.bones, this.collectItem, this.checkCollectible, this);
+        this.physics.add.overlap(this.player, this.treats, this.collectItem, this.checkCollectible, this);
         
         // Enemies
         this.physics.add.collider(this.enemies, this.platforms);
-        this.physics.add.overlap(this.player, this.enemies, this.hitEnemy, null, this);
+        this.physics.add.overlap(this.player, this.enemies, this.hitEnemy, this.checkEnemyCollision, this);
         
         // Lost Dogs
-        this.physics.add.overlap(this.player, this.lostDogs, this.rescueDog, null, this);
+        this.physics.add.overlap(this.player, this.lostDogs, this.rescueDog, this.checkDogCollision, this);
+    }
+    
+    checkCollectible(player, item) {
+        // Process callback - always return true to allow collection
+        return item && item.active;
+    }
+    
+    checkEnemyCollision(player, enemy) {
+        return enemy && enemy.active && !enemy.defeated;
+    }
+    
+    checkDogCollision(player, dog) {
+        return dog && dog.active && !dog.isRescued;
     }
     
     collectItem(player, item) {
-        item.collect(player, this);
-        this.updateHUD();
+        if (item && item.active && item.collect) {
+            item.collect(player, this);
+            this.updateHUD();
+        }
     }
     
     hitEnemy(player, enemy) {
@@ -349,7 +366,7 @@ class GameScene extends Phaser.Scene {
     }
     
     rescueDog(player, dog) {
-        if (!dog.isRescued) {
+        if (dog && dog.active && !dog.isRescued && dog.rescue) {
             dog.rescue(player, this);
             this.updateHUD();
         }
@@ -522,15 +539,21 @@ class GameScene extends Phaser.Scene {
             if (enemy.active) enemy.update();
         });
         
-        // Update collectibles
+        // Update collectibles with physics sync
         this.tennisBalls.children.entries.forEach(item => {
-            if (item.active) item.update(this.time.now);
+            if (item && item.active && item.update) {
+                item.update(this.time.now);
+            }
         });
         this.bones.children.entries.forEach(item => {
-            if (item.active) item.update(this.time.now);
+            if (item && item.active && item.update) {
+                item.update(this.time.now);
+            }
         });
         this.treats.children.entries.forEach(item => {
-            if (item.active) item.update(this.time.now);
+            if (item && item.active && item.update) {
+                item.update(this.time.now);
+            }
         });
         
         // Update lost dogs and check for player proximity
