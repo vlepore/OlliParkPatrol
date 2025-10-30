@@ -357,9 +357,18 @@ class GameScene extends Phaser.Scene {
     }
     
     collectItem(player, item) {
-        if (item && item.active && item.collect) {
+        if (item && item.active && !item.isCollecting && item.collect) {
             item.collect(player, this);
             this.updateHUD();
+            
+            // Force remove from group to prevent re-collision
+            if (this.tennisBalls.contains(item)) {
+                this.tennisBalls.remove(item, true, true);
+            } else if (this.bones.contains(item)) {
+                this.bones.remove(item, true, true);
+            } else if (this.treats.contains(item)) {
+                this.treats.remove(item, true, true);
+            }
         }
     }
     
@@ -397,40 +406,46 @@ class GameScene extends Phaser.Scene {
     }
     
     createHUD() {
+        // Detect mobile for larger text
+        const isMobile = this.cameras.main.width <= 600;
+        const fontSize = isMobile ? 20 : 16;
+        const smallFontSize = isMobile ? 16 : 14;
+        const tinyFontSize = isMobile ? 14 : 12;
+        
         // Create fixed HUD container
         this.hudContainer = this.add.container(0, 0).setScrollFactor(0).setDepth(100);
         
-        // Background panel
-        const hudBg = this.add.rectangle(10, 10, 280, 80, 0x000000, 0.5).setOrigin(0);
+        // Background panel - larger on mobile
+        const hudBg = this.add.rectangle(10, 10, isMobile ? 580 : 280, isMobile ? 100 : 80, 0x000000, 0.6).setOrigin(0);
         
-        // Score
+        // Score - larger on mobile
         this.scoreText = this.add.text(20, 20, `Score: ${gameManager.score}`, {
-            fontSize: '16px',
+            fontSize: `${fontSize}px`,
             fontFamily: 'Press Start 2P',
             color: '#FFD700'
         });
         
         // Health hearts
-        this.healthContainer = this.add.container(20, 50);
+        this.healthContainer = this.add.container(20, isMobile ? 55 : 50);
         this.updateHealthDisplay();
         
         // Zoomies meter
-        this.zoomiesText = this.add.text(120, 50, `⚡: ${gameManager.tennisBallStreak}/3`, {
-            fontSize: '14px',
+        this.zoomiesText = this.add.text(isMobile ? 200 : 120, isMobile ? 55 : 50, `⚡: ${gameManager.tennisBallStreak}/3`, {
+            fontSize: `${smallFontSize}px`,
             fontFamily: 'Press Start 2P',
             color: '#FFFF00'
         });
         
         // Timer
-        this.timerText = this.add.text(20, 70, 'Time: 0:00', {
-            fontSize: '12px',
+        this.timerText = this.add.text(20, isMobile ? 80 : 70, 'Time: 0:00', {
+            fontSize: `${tinyFontSize}px`,
             fontFamily: 'Press Start 2P',
             color: '#FFFFFF'
         });
         
         // Dogs rescued
-        this.dogsText = this.add.text(170, 20, `🐕: ${gameManager.dogsRescued}/${gameManager.totalDogs}`, {
-            fontSize: '14px',
+        this.dogsText = this.add.text(isMobile ? 380 : 170, 20, `🐕: ${gameManager.dogsRescued}/${gameManager.totalDogs}`, {
+            fontSize: `${smallFontSize}px`,
             fontFamily: 'Press Start 2P',
             color: '#FFA500'
         });
@@ -439,11 +454,15 @@ class GameScene extends Phaser.Scene {
     }
     
     updateHealthDisplay() {
+        const isMobile = this.cameras.main.width <= 600;
+        const heartSize = isMobile ? 28 : 20;
+        const spacing = isMobile ? 35 : 25;
+        
         this.healthContainer.removeAll(true);
         
         for (let i = 0; i < gameManager.maxHealth; i++) {
-            const heart = this.add.text(i * 25, 0, i < gameManager.health ? '♥' : '♡', {
-                fontSize: '20px',
+            const heart = this.add.text(i * spacing, 0, i < gameManager.health ? '♥' : '♡', {
+                fontSize: `${heartSize}px`,
                 color: i < gameManager.health ? '#FF0000' : '#666666'
             });
             this.healthContainer.add(heart);

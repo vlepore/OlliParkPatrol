@@ -112,15 +112,16 @@ class LostDog extends Phaser.Physics.Arcade.Sprite {
             if (hearts) hearts.destroy();
         });
         
-        // Floating text
+        // Floating text - larger on mobile
+        const isMobile = scene.cameras.main.width <= 600;
         const rescueText = scene.add.text(this.x, this.y - 60, 'RESCUED!\n+150', {
-            fontSize: '24px',
+            fontSize: isMobile ? '32px' : '24px',
             color: '#00FF00',
             fontFamily: 'Press Start 2P',
             stroke: '#000',
-            strokeThickness: 4,
+            strokeThickness: isMobile ? 6 : 4,
             align: 'center'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
         
         scene.tweens.add({
             targets: rescueText,

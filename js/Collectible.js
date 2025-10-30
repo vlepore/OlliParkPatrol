@@ -94,15 +94,16 @@ class Collectible extends Phaser.Physics.Arcade.Sprite {
             if (particles && particles.active) particles.destroy();
         });
         
-        // Create floating score text
+        // Create floating score text - larger on mobile
         const points = this.getPoints();
         if (points > 0) {
+            const isMobile = scene.cameras.main.width <= 600;
             const scoreText = scene.add.text(this.x, this.y, `+${points}`, {
-                fontSize: '20px',
+                fontSize: isMobile ? '28px' : '20px',
                 color: '#FFD700',
                 fontFamily: 'Press Start 2P',
                 stroke: '#000',
-                strokeThickness: 4
+                strokeThickness: isMobile ? 6 : 4
             }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
             
             // Convert to screen position
@@ -124,10 +125,21 @@ class Collectible extends Phaser.Physics.Arcade.Sprite {
         // Update game state based on type
         this.applyEffect(player);
         
-        // Destroy collectible
+        // Destroy collectible immediately and remove from physics
         if (this.sparkle && this.sparkle.active) {
             this.sparkle.destroy();
         }
+        
+        // Disable physics body first
+        if (this.body) {
+            this.body.enable = false;
+        }
+        
+        // Remove from scene
+        this.setActive(false);
+        this.setVisible(false);
+        
+        // Destroy the sprite
         this.destroy();
     }
     
