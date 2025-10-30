@@ -135,12 +135,16 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // Jumping with double jump (keyboard + mobile)
         const jumpPressed = this.cursors.up.isDown || this.wasd.up.isDown || this.spaceKey.isDown || this.mobileControls.jump;
         
-        // Reset jumps when on ground
+        // Reset jumps when on ground AND button not pressed
         if (this.body.touching.down) {
             this.jumpsRemaining = this.maxJumps;
+            // If on ground and not pressing jump, ready for next jump
+            if (!jumpPressed) {
+                this.hasReleasedJump = true;
+            }
         }
         
-        // Detect jump button release for next jump
+        // Detect jump button release for next jump (also works in air)
         if (!jumpPressed) {
             this.hasReleasedJump = true;
         }
