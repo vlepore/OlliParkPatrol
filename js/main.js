@@ -13,7 +13,8 @@ const config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 800 },
-            debug: false
+            debug: false,
+            fps: 60 // Lock physics to 60fps for consistency
         }
     },
     scene: [BootScene, MainMenuScene, GameScene, GameOverScene, LeaderboardScene],
@@ -22,7 +23,11 @@ const config = {
         autoCenter: isMobile ? Phaser.Scale.CENTER_HORIZONTALLY : Phaser.Scale.CENTER_BOTH,
         parent: 'game'
     },
-    pixelArt: true
+    pixelArt: true,
+    fps: {
+        target: 60,
+        forceSetTimeOut: false
+    }
 };
 
 // Initialize Game

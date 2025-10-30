@@ -246,31 +246,30 @@ class MobileControls {
         const player = this.scene.player;
         if (!player || !player.active) return;
         
+        // Initialize mobile controls if not present
+        if (!player.mobileControls) {
+            player.mobileControls = {
+                left: false,
+                right: false,
+                jump: false
+            };
+        }
+        
         switch(action) {
             case 'left':
-                if (pressed) {
-                    player.mobileControls = player.mobileControls || {};
-                    player.mobileControls.left = true;
-                } else {
-                    if (player.mobileControls) player.mobileControls.left = false;
-                }
+                player.mobileControls.left = pressed;
                 break;
                 
             case 'right':
-                if (pressed) {
-                    player.mobileControls = player.mobileControls || {};
-                    player.mobileControls.right = true;
-                } else {
-                    if (player.mobileControls) player.mobileControls.right = false;
-                }
+                player.mobileControls.right = pressed;
                 break;
                 
             case 'jump':
-                if (pressed) {
-                    player.mobileControls = player.mobileControls || {};
+                // For mobile, simulate key press/release properly
+                if (pressed && !player.mobileControls.jump) {
                     player.mobileControls.jump = true;
-                } else {
-                    if (player.mobileControls) player.mobileControls.jump = false;
+                } else if (!pressed) {
+                    player.mobileControls.jump = false;
                 }
                 break;
                 

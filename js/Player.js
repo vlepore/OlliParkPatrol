@@ -138,10 +138,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // Reset jumps when on ground
         if (this.body.touching.down) {
             this.jumpsRemaining = this.maxJumps;
-            this.hasReleasedJump = false;
         }
         
-        // Allow jump if button was released (prevents holding)
+        // Detect jump button release for next jump
         if (!jumpPressed) {
             this.hasReleasedJump = true;
         }
@@ -157,16 +156,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
                 this.scene.sound.play('jump', { volume: 0.3 });
             }
             
-            // Visual effect for double jump
-            if (this.jumpsRemaining === 0 && !this.body.touching.down) {
+            // Visual effect for double jump (only on second jump)
+            if (this.jumpsRemaining === 0) {
                 this.createDoubleJumpEffect();
-            }
-            
-            // Reset jump flag for mobile (to prevent continuous jumping)
-            if (this.mobileControls.jump) {
-                this.scene.time.delayedCall(100, () => {
-                    this.mobileControls.jump = false;
-                });
             }
         }
         

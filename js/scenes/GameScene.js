@@ -529,36 +529,41 @@ class GameScene extends Phaser.Scene {
         });
     }
     
-    update() {
+    update(time, delta) {
+        // Limit physics updates to prevent glitches
+        const fixedDelta = Math.min(delta, 33); // Cap at ~30fps equivalent
+        
         if (this.player && this.player.active) {
             this.player.update();
         }
         
         // Update enemies
         this.enemies.children.entries.forEach(enemy => {
-            if (enemy.active) enemy.update();
+            if (enemy && enemy.active && enemy.update) {
+                enemy.update();
+            }
         });
         
-        // Update collectibles with physics sync
+        // Update collectibles with physics sync - use actual time
         this.tennisBalls.children.entries.forEach(item => {
             if (item && item.active && item.update) {
-                item.update(this.time.now);
+                item.update(time);
             }
         });
         this.bones.children.entries.forEach(item => {
             if (item && item.active && item.update) {
-                item.update(this.time.now);
+                item.update(time);
             }
         });
         this.treats.children.entries.forEach(item => {
             if (item && item.active && item.update) {
-                item.update(this.time.now);
+                item.update(time);
             }
         });
         
         // Update lost dogs and check for player proximity
         this.lostDogs.children.entries.forEach(dog => {
-            if (dog.active) {
+            if (dog && dog.active && dog.update) {
                 dog.update();
                 
                 // Super Sniffer: Reveal nearby dogs
