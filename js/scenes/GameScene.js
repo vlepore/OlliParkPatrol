@@ -325,10 +325,15 @@ class GameScene extends Phaser.Scene {
             this.player.body.setDragX(800);
         }
         
-        // Collectibles - use collider instead of overlap for better detection
+        // Collectibles - use overlap with process callback for better detection
         this.physics.add.overlap(this.player, this.tennisBalls, this.collectItem, this.checkCollectible, this);
         this.physics.add.overlap(this.player, this.bones, this.collectItem, this.checkCollectible, this);
         this.physics.add.overlap(this.player, this.treats, this.collectItem, this.checkCollectible, this);
+        
+        // Enable collision detection for collectibles groups
+        this.tennisBalls.setActive(true);
+        this.bones.setActive(true);
+        this.treats.setActive(true);
         
         // Enemies
         this.physics.add.collider(this.enemies, this.platforms);
@@ -339,8 +344,8 @@ class GameScene extends Phaser.Scene {
     }
     
     checkCollectible(player, item) {
-        // Process callback - always return true to allow collection
-        return item && item.active;
+        // Process callback - check if item is active and not already being collected
+        return item && item.active && !item.isCollecting;
     }
     
     checkEnemyCollision(player, enemy) {

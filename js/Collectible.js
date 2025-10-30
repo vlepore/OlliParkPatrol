@@ -10,14 +10,18 @@ class Collectible extends Phaser.Physics.Arcade.Sprite {
         this.setCollideWorldBounds(false);
         this.body.setAllowGravity(false);
         
-        // Set proper collision body size
-        this.setSize(20, 20);
-        this.body.setSize(20, 20);
+        // Set larger collision body for better detection
+        this.setSize(24, 24);
+        this.body.setSize(24, 24);
+        this.body.setOffset(0, 0);
         
         // Floating animation
         this.startY = y;
         this.floatOffset = 0;
         this.baseY = y;
+        
+        // Collected flag to prevent double collection
+        this.isCollecting = false;
         
         // Add sparkle effect
         this.createSparkle(scene);
@@ -42,12 +46,15 @@ class Collectible extends Phaser.Physics.Arcade.Sprite {
     }
     
     update(time) {
+        if (!this.active || this.isCollecting) return;
+        
         // Gentle floating motion
         this.floatOffset = Math.sin(time * 0.003) * 5;
         this.y = this.baseY + this.floatOffset;
         
-        // Update physics body position
+        // CRITICAL: Force physics body to sync with sprite position
         if (this.body) {
+            this.body.position.y = this.y - this.body.halfHeight;
             this.body.updateFromGameObject();
         }
         
@@ -61,7 +68,9 @@ class Collectible extends Phaser.Physics.Arcade.Sprite {
     
     collect(player, scene) {
         // Prevent double collection
-        if (!this.active) return;
+        if (!this.active || this.isCollecting) return;
+        
+        this.isCollecting = true;
         
         // Play collect sound
         if (scene.sound.get('collect')) {
