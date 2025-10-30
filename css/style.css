@@ -45,12 +45,25 @@ body {
     font-size: 2rem;
     margin-bottom: 10px;
     color: #FFD700;
+    text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
 }
 
 #game-title p {
     font-size: 0.7rem;
     color: #FFF;
     opacity: 0.9;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Mobile - Much larger text */
+@media (max-width: 768px) {
+    #game-title h1 {
+        font-size: 1.8rem;
+    }
+    
+    #game-title p {
+        font-size: 0.8rem;
+    }
 }
 
 #game {

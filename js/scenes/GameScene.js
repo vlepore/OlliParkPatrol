@@ -277,18 +277,31 @@ class GameScene extends Phaser.Scene {
         levelData.tennisBalls.forEach(pos => {
             const ball = new TennisBall(this, pos.x, pos.y);
             this.tennisBalls.add(ball);
+            // Ensure physics body is active and positioned correctly
+            if (ball.body) {
+                ball.body.reset(pos.x, pos.y);
+                ball.body.setAllowGravity(false);
+            }
         });
         
         // Bones
         levelData.bones.forEach(pos => {
             const bone = new Bone(this, pos.x, pos.y);
             this.bones.add(bone);
+            if (bone.body) {
+                bone.body.reset(pos.x, pos.y);
+                bone.body.setAllowGravity(false);
+            }
         });
         
         // Treats
         levelData.treats.forEach(pos => {
             const treat = new Treat(this, pos.x, pos.y);
             this.treats.add(treat);
+            if (treat.body) {
+                treat.body.reset(pos.x, pos.y);
+                treat.body.setAllowGravity(false);
+            }
         });
     }
     
@@ -331,9 +344,9 @@ class GameScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.treats, this.collectItem, this.checkCollectible, this);
         
         // Enable collision detection for collectibles groups
-        this.tennisBalls.setActive(true);
-        this.bones.setActive(true);
-        this.treats.setActive(true);
+        this.physics.world.enable(this.tennisBalls.getChildren());
+        this.physics.world.enable(this.bones.getChildren());
+        this.physics.world.enable(this.treats.getChildren());
         
         // Enemies
         this.physics.add.collider(this.enemies, this.platforms);

@@ -50,12 +50,14 @@ class Collectible extends Phaser.Physics.Arcade.Sprite {
         
         // Gentle floating motion
         this.floatOffset = Math.sin(time * 0.003) * 5;
-        this.y = this.baseY + this.floatOffset;
+        const newY = this.baseY + this.floatOffset;
         
-        // CRITICAL: Force physics body to sync with sprite position
+        // CRITICAL: Update both sprite and physics body together
+        this.y = newY;
         if (this.body) {
-            this.body.position.y = this.y - this.body.halfHeight;
-            this.body.updateFromGameObject();
+            // Force the body to match the sprite position exactly
+            this.body.reset(this.x, this.y);
+            this.body.setAllowGravity(false);
         }
         
         if (this.sparkle && this.sparkle.active) {

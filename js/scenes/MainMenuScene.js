@@ -25,26 +25,29 @@ class MainMenuScene extends Phaser.Scene {
         this.createCloud(600, 120, 0.8);
         this.createCloud(350, 60, 1);
         
-        // Title
-        const title = this.add.text(width / 2, 100, "OLLI'S\nPARK PATROL", {
-            fontSize: '48px',
+        // Detect mobile for text sizing
+        const isMobile = width <= 600;
+        
+        // Title - larger on mobile
+        const title = this.add.text(width / 2, isMobile ? 80 : 100, "OLLI'S\nPARK PATROL", {
+            fontSize: isMobile ? '40px' : '48px',
             fontFamily: 'Press Start 2P',
             color: '#FFD700',
             stroke: '#000',
-            strokeThickness: 8,
+            strokeThickness: isMobile ? 6 : 8,
             align: 'center',
-            lineSpacing: 10
+            lineSpacing: isMobile ? 8 : 10
         }).setOrigin(0.5);
         
-        // Tagline
-        const tagline = this.add.text(width / 2, 200, 'One doodle, one park,\nendless adventures.', {
-            fontSize: '14px',
+        // Tagline - larger on mobile
+        const tagline = this.add.text(width / 2, isMobile ? 180 : 200, 'One doodle, one park,\nendless adventures.', {
+            fontSize: isMobile ? '16px' : '14px',
             fontFamily: 'Press Start 2P',
             color: '#FFFFFF',
             stroke: '#000',
-            strokeThickness: 4,
+            strokeThickness: isMobile ? 5 : 4,
             align: 'center',
-            lineSpacing: 5
+            lineSpacing: isMobile ? 8 : 5
         }).setOrigin(0.5);
         
         // Olli character preview
@@ -58,8 +61,8 @@ class MainMenuScene extends Phaser.Scene {
             ease: 'Sine.easeInOut'
         });
         
-        // Buttons
-        const startButton = this.createButton(width / 2, 360, 'START GAME', () => {
+        // Buttons - adjusted positions for mobile
+        const startButton = this.createButton(width / 2, isMobile ? 340 : 360, 'START GAME', () => {
             this.sound.play('collect', { volume: 0.5 });
             this.cameras.main.fade(500, 0, 0, 0);
             this.time.delayedCall(500, () => {
@@ -68,12 +71,12 @@ class MainMenuScene extends Phaser.Scene {
             });
         });
         
-        const leaderboardButton = this.createButton(width / 2, 430, 'LEADERBOARD', () => {
+        const leaderboardButton = this.createButton(width / 2, isMobile ? 410 : 430, 'LEADERBOARD', () => {
             this.sound.play('collect', { volume: 0.5 });
             this.scene.start('LeaderboardScene', { returnTo: 'MainMenuScene' });
         });
         
-        const howToPlayButton = this.createButton(width / 2, 500, 'HOW TO PLAY', () => {
+        const howToPlayButton = this.createButton(width / 2, isMobile ? 480 : 500, 'HOW TO PLAY', () => {
             this.sound.play('collect', { volume: 0.5 });
             this.showHowToPlay();
         });
